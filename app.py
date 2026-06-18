@@ -110,4 +110,7 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
                 x=df_grafico.index,
                 open=df_grafico['open'],
                 high=df_grafico['high'],
-                low=df
+                low=df_grafico['low'],
+                close=df_grafico['close'],
+                name='Cotización'
+            ))
