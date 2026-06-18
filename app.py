@@ -114,3 +114,48 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
                 close=df_grafico['close'],
                 name='Cotización'
             ))
+
+            # Capa 2: Media Rápida
+            fig.add_trace(go.Scatter(
+                x=df_grafico.index, y=df_grafico['SMA_5'],
+                line=dict(color='#FFA500', width=1.5), name='SMA 5'
+            ))
+
+            # Capa 3: Media Lenta
+            fig.add_trace(go.Scatter(
+                x=df_grafico.index, y=df_grafico['SMA_20'],
+                line=dict(color='#00BFFF', width=1.5), name='SMA 20'
+            ))
+
+            # Ajustes visuales del gráfico
+            fig.update_layout(
+                template="plotly_dark",
+                margin=dict(l=0, r=0, t=30, b=0),
+                xaxis_rangeslider_visible=False,
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Gráfico del RSI
+            st.subheader("📉 Oscilador RSI")
+            st.line_chart(df[['RSI']])
+            
+            # 4. DECISIÓN DEL AGENTE
+            st.divider()
+            ultima_sma5 = df['SMA_5'].iloc[-1]
+            ultima_sma20 = df['SMA_20'].iloc[-1]
+            previa_sma5 = df['SMA_5'].iloc[-2]
+            previa_sma20 = df['SMA_20'].iloc[-2]
+            
+            if previa_sma5 <= previa_sma20 and ultima_sma5 > ultima_sma20 and ultimo_rsi < 70:
+                st.success(f"🟢 SEÑAL DE COMPRA: El Agente Lepan recomienda comprar {activo_seleccionado}.")
+            elif previa_sma5 >= previa_sma20 and ultima_sma5 < ultima_sma20:
+                st.error(f"🔴 SEÑAL DE VENTA: El Agente Lepan recomienda vender {activo_seleccionado}.")
+            else:
+                st.info(f"⚪ MERCADO ESTABLE: El Agente Lepan vigila {activo_seleccionado} a la espera.")
+
+        except Exception as e:
+            st.error(f"Error en el análisis de datos: {e}")
+else:
+    st.info("👈 Configura tu mercado en el panel lateral y haz clic en 'Analizar Mercado Ahora'.")
