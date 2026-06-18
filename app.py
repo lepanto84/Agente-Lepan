@@ -59,10 +59,10 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
             col2.metric("₿ BTC en Cartera", f"{btc_disponible:.4f} BTC")
             col3.metric("🌡️ RSI Actual", f"{df['RSI'].iloc[-1]:.2f}")
 
-            # Gráfico de Precios y Medias Móviles
-            st.subheader("📊 Cotización y Cruce de Medias (BTC/EUR)")
-            # Filtramos las filas vacías para que el eje Y se ajuste bien
-            df_grafico = df.iloc[20:]
+           # Filtramos cualquier fila que tenga un cero o un dato corrupto
+            df_grafico = df[(df['Precio_EUR'] > 0) & (df['SMA_5'] > 0) & (df['SMA_20'] > 0)]
+
+            # Dibujamos el gráfico con los datos totalmente limpios
             st.line_chart(df_grafico[['Precio_EUR', 'SMA_5', 'SMA_20']])
             # Gráfico del RSI
             st.subheader("📉 Oscilador RSI")
