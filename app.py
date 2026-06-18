@@ -87,4 +87,74 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
                         
                         df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
                         df.index = df.index.tz_localize(None) 
-                        df['Precio_EUR'] = df['close']
+                        df['Precio_EUR'] = df['close'] 
+
+                    # 2. CALCULAR INDICADORES
+                    df['SMA_5'] = df['Precio_EUR'].rolling(window=5).mean()
+                    df['SMA_20'] = df['Precio_EUR'].rolling(window=20).mean()
+                    df['RSI'] = ta.rsi(df['close'], length=14)
+                    ultimo_rsi = df['RSI'].iloc[-1] if not pd.isna(df['RSI'].iloc[-1]) else 0.0
+
+                    # --- DIBUJAR EL PANEL VISUAL ---
+                    col1, col2, col3 = st.columns(3)
+                    if tipo_mercado == "Criptomonedas (Binance)":
+                        col1.metric("💰 Saldo Total", f"{saldo_eur:.2f} €")
+                        col2.metric(f"🪙 {activo} en Cartera", f"{moneda_disponible:.4f}")
+                    else:
+                        col1.metric("🌐 Mercado Tradicional", "Materias Primas")
+                        col2.metric("📦 Activo Analizado", activo)
+                        
+                    col3.metric("🌡️ RSI Actual", f"{ultimo_rsi:.2f}")
+
+                    df_grafico = df.dropna().copy()
+
+                    # 3. EL NUEVO GRÁFICO DE VELAS (PLOTLY)
+                    st.subheader(f"📊 Gráfico de Velas y Medias: {activo}")
+                    fig = go.Figure()
+
+                    fig.add_trace(go.Candlestick(
+                        x=df_grafico.index,
+                        open=df_grafico['open'],
+                        high=df_grafico['high'],
+                        low=df_grafico['low'],
+                        close=df_grafico['close'],
+                        name='Cotización'
+                    ))
+
+                    fig.add_trace(go.Scatter(
+                        x=df_grafico.index, y=df_grafico['SMA_5'],
+                        line=dict(color='#FFA500', width=1.5), name='SMA 5'
+                    ))
+
+                    fig.add_trace(go.Scatter(
+                        x=df_grafico.index, y=df_grafico['SMA_20'],
+                        line=dict(color='#00BFFF', width=1.5), name='SMA 20'
+                    ))
+
+                    fig.update_layout(
+                        template="plotly_dark",
+                        margin=dict(l=0, r=0, t=30, b=0),
+                        xaxis_rangeslider_visible=False,
+                        height=450
+                    )
+
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # 4. DECISIÓN DEL AGENTE
+                    ultima_sma5 = df['SMA_5'].iloc[-1]
+                    ultima_sma20 = df['SMA_20'].iloc[-1]
+                    previa_sma5 = df['SMA_5'].iloc[-2]
+                    previa_sma20 = df['SMA_20'].iloc[-2]
+                    
+                    if previa_sma5 <= previa_sma20 and ultima_sma5 > ultima_sma20 and ultimo_rsi < 70:
+                        st.success(f"🟢 SEÑAL DE COMPRA: El Agente Lepan recomienda comprar {activo}.")
+                    elif previa_sma5 >= previa_sma20 and ultima_sma5 < ultima_sma20:
+                        st.error(f"🔴 SEÑAL DE VENTA: El Agente Lepan recomienda vender {activo}.")
+                    else:
+                        st.info(f"⚪ MERCADO ESTABLE: El Agente Lepan vigila {activo} a la espera.")
+
+                except Exception as e:
+                    st.error(f"Error en el análisis de {activo}: {e}")
+                    
+else:
+    st.info("👈 Configura tu mercado en el panel lateral y haz clic en 'Analizar Mercado Ahora'.")
