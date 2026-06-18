@@ -3,3 +3,5 @@ ccxt
 pandas
 pandas_ta
 openpyxl
+plotly
+yfinance
