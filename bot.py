@@ -16,9 +16,10 @@ CANTIDAD_COMPRA = 0.05
 def registrar_evento(mensaje):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     log_entrada = f"[{timestamp}] {mensaje}\n"
-    print(log_entrada.strip()) # Lo muestra en pantalla
-    with open("historial_operaciones.txt", "a") as f:
-        f.write(log_entrada) # Lo guarda en el archivo
+    print(log_entrada.strip()) 
+    # Cambiamos esta línea añadiendo encoding='utf-8'
+    with open("historial_operaciones.txt", "a", encoding='utf-8') as f:
+        f.write(log_entrada)
 
 # --- CONEXIÓN ---
 exchange = ccxt.binance({'apiKey': API_KEY, 'secret': API_SECRET, 'enableRateLimit': True})
