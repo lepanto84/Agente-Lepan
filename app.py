@@ -62,7 +62,7 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
             # Gráfico de Precios y Medias Móviles
             st.subheader("📊 Cotización y Cruce de Medias (BTC/EUR)")
             # Filtramos las filas vacías para que el eje Y se ajuste bien
-            df_grafico = df.dropna()
+            df_grafico = df.iloc[20:]
             st.line_chart(df_grafico[['Precio_EUR', 'SMA_5', 'SMA_20']])
             # Gráfico del RSI
             st.subheader("📉 Oscilador RSI")
