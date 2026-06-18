@@ -87,4 +87,4 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
                         
                         df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
                         df.index = df.index.tz_localize(None) 
-                        df['Precio_EUR'] = df['close
+                        df['Precio_EUR'] = df['close']
