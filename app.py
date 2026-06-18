@@ -2,6 +2,7 @@ import streamlit as st
 import ccxt
 import pandas as pd
 import pandas_ta as ta
+import altair as alt
 
 # --- CONFIGURACIÓN DE LA PÁGININA ---
 st.set_page_config(page_title="Agente Lepan", page_icon="📈", layout="wide")
@@ -59,11 +60,23 @@ if st.sidebar.button("🔄 Analizar Mercado Ahora"):
             col2.metric("₿ BTC en Cartera", f"{btc_disponible:.4f} BTC")
             col3.metric("🌡️ RSI Actual", f"{df['RSI'].iloc[-1]:.2f}")
 
-           # Filtramos cualquier fila que tenga un cero o un dato corrupto
-            df_grafico = df[(df['Precio_EUR'] > 0) & (df['SMA_5'] > 0) & (df['SMA_20'] > 0)]
+           # Aseguramos que los datos están perfectamente limpios
+            df_grafico = df.dropna().copy()
+            df_grafico = df_grafico[df_grafico['Precio_EUR'] > 0]
 
-            # Dibujamos el gráfico con los datos totalmente limpios
-            st.line_chart(df_grafico[['Precio_EUR', 'SMA_5', 'SMA_20']])
+            # Extraemos el tiempo para usarlo en el eje inferior
+            df_grafico['Tiempo'] = df_grafico.index
+            df_curvas = df_grafico.melt(id_vars=['Tiempo'], value_vars=['Precio_EUR', 'SMA_5', 'SMA_20'])
+
+            # Creamos el gráfico avanzado con el eje libre
+            grafico = alt.Chart(df_curvas).mark_line().encode(
+            x='Tiempo:T',
+            y=alt.Y('value:Q', scale=alt.Scale(zero=False)),
+            color=alt.Color('variable:N', legend=alt.Legend(title="Indicadores"))
+            )
+
+            # Dibujamos el nuevo gráfico en pantalla
+            st.altair_chart(grafico, use_container_width=True)
             # Gráfico del RSI
             st.subheader("📉 Oscilador RSI")
             st.line_chart(df[['RSI']])
